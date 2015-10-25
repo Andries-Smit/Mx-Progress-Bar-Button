@@ -1,0 +1,11 @@
+.mx-progress-item.withProgressBar{
+      background: none;
+}
+
+.withProgressBar  .mx-progress-indicator {
+    display: none;
+}
+
+.withProgressBar .progress {
+    margin-top: 20px;
+}

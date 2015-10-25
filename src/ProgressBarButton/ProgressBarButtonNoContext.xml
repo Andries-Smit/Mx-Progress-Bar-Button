@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="ProgressBarButton.widget.ProgressBarButtonNoContext" needsEntityContext="false" xmlns="http://www.mendix.com/widget/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mendix.com/widget/1.0/ ../../xsd/widget.xsd">
+    <name>Progress Bar Button (no context)</name>
+    <description>The description of this widget.</description>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wQBDigbvyaPswAAAzpJREFUOMtdk39olHUcx1/Pcz/23K9d3n54brM52mZpW6W21lRi/ZxCJjJWlLVq/aCtpEWExiCCTEKs1NQj0DyctRTJTWhUtij3Q7mJy1EKhSa6tu623Xbb3T13zz3Ptz96jqIPfPjw4cP7DW/4vCTMCvYMyoAMWAGLObNlABmz9eYNdUb2IAGSJEk7hBAvAbjcnuDHn3XvsucoNvOOKUxtaX70sdjM9JbV9etW9fd9rfKPWH5eCOOgy537jtVmc8xGp7Y+vHHz0NpHGvM1TS8RAmRZuh6LRkZ2v9v60C2Vy5s6PggMAqnmDXW6LITxCsCaB9Z/+0TLGwmAyxdD997s91Usryh2LCsvchT7F1Se7j7SdGftg/rm194rBZyAPdgzKMtAJcB9DY35RaVLnwSY/GsMxZGDIcBA4pcLZ4mMX2PT0635sXn19WtjU8uAHMAi/5tTfsbtzLkVQAhBRjfwed1k0kmCgV0827aNwvw8FMV+++yc2mIaWGWLxXIFIBIJ1+haEgB/0WJ0XRBX0wQDH1Kz+n7Kb6tGNwycikIylanNGlh9BQs/j0z8ecfF4YHiibxcAOobNiKAc0NnGB0ZZu+hE+hY+PLwbvq/P4We0Su+cLm2bv+k8232He0tKfQXB3MUp+F0ecT6TU+JQ1+dEYGu70RegV9s275XnDh9Xrzc3iEA0dD4glhZ35QGhMd7U6vV7fHqOz89/tHV6+G1hXneModiRwDHgvupXlHDXatqUVMZeruPA1BeVYcnEr1x/odjZfG5WIsMaIAqyfLwTCyBrgsujY5w4Vw/L776JhndYHY+RXj8hvlRCu5c31kAwzDKswZxt1PpmkukfhubmOTwvh083tLOdFwwOZNE1XSE+ZJJNXXZpdBprkIG0kAyf4H7Z8VuO3DyaCBaUFTG4soVxJMa8wmNqWgcr28hALORPzp/HToVMQ1+t2YjANberj1XR0M/8txbe3rGI7NVmpZZZAgQgrHSpSunw2NX7v7p5AFHSlXXmRwErIAOqCOhAVtooO/9RSVLOtbcU90HKP+BSautaktcCn3TPj0ZbjPFO4UQByUTZclE2AbYzfl/GjWz00Ami/TfCcNh0M4xSX0AAAAASUVORK5CYII=</icon>
+    <properties>
+        <property key="caption" type="translatableString" required="false">
+            <caption>Caption</caption>
+            <category>Appearance</category>
+            <description>Caption of the button (can be empty)</description>
+        </property>
+        <property key="title" type="translatableString" required="false">
+            <caption>Tool Tip</caption>
+            <category>Appearance</category>
+            <description>Button Tooltip</description>
+        </property>
+        <!-- No context resilts in no dynamic caption,  
+        <property key="captionAtt" type="attribute" required="false" >
+            <caption>Caption Attribute</caption>
+            <category>Appearance</category>
+            <description>Caption based on attribute</description>
+            <attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
+        </property>  -->      
+        <property key="icon" type="image" required="false">
+            <caption>Image</caption>
+            <category>Appearance</category>
+            <description>The Image shown in the button in front of the caption</description>
+        </property>
+        <property key="buttonStyle" type="enumeration" required="true" defaultValue="default">
+            <caption>Button Style</caption>
+            <category>Appearance</category>
+            <description>The Boodstrap rendered style, or as link</description>
+            <enumerationValues>
+                <enumerationValue key="default">Default</enumerationValue>
+                <enumerationValue key="primary">Primary</enumerationValue>
+                <enumerationValue key="success">Success</enumerationValue>
+                <enumerationValue key="info">Info</enumerationValue>
+                <enumerationValue key="warning">Warning</enumerationValue>
+                <enumerationValue key="danger">Danger</enumerationValue>
+                <enumerationValue key="link">Link</enumerationValue>
+            </enumerationValues>
+        </property>                
+        <property key="onClickMicroflow" type="string" required="true" >
+            <caption>On Click MF</caption>
+            <category>Behaviour</category>
+            <description>Click microflow name (module.mfname). Should have 2 input params (Context and Progress entity)</description>		
+        </property>                
+        <property key="cancelMicroflow" type="microflow" required="false" entityProperty="progressEntity">
+            <caption>Cancel MF</caption>
+            <category>Behaviour</category>
+            <description>This microflow should cancel processing.</description>
+            <returnType type="Void" />
+        </property>
+        <property key="processCancel" type="translatableString" required="false">
+            <caption>Process Cancel button</caption>
+            <category>Behaviour</category>
+            <description/>
+            <translations>
+                <translation lang="en_US">Cancel</translation>
+                <translation lang="nl_NL">Annuleren</translation>
+            </translations>
+        </property>       
+        <property key="cancelingCaption" type="translatableString" required="false">
+            <caption>Canceling Text</caption>
+            <category>Behaviour</category>
+            <description/>
+            <translations>
+                <translation lang="en_US">Canceling in progress</translation>
+                <translation lang="nl_NL">Annulering aangevraagd</translation>
+            </translations>
+        </property>             
+        <property key="async" type="boolean" defaultValue="false">
+            <caption>Asynchronous</caption>
+            <category>Behaviour</category>
+            <description/>
+        </property>        
+        <property key="blocking" type="boolean" defaultValue="true">
+            <caption>Blocking</caption>
+            <category>Behaviour</category>
+            <description/>
+        </property>
+        <!-- No context; no validation
+        <property key="validate" type="boolean" defaultValue="false">
+            <caption>Validate form</caption>
+            <category>Behaviour</category>
+            <description/>
+        </property>
+        -->
+        <property key="progressEntity" type="entity" required="true" allowNonPersistableEntities="true">
+            <caption>Setting Entity</caption>
+            <category>Progress</category>
+            <description>Progress entity</description>
+        </property>
+        <property key="progressMessage" type="translatableString" required="false">
+            <caption>Progress Message</caption>
+            <category>Progress</category>
+            <description>Static Progress message</description>
+        </property>
+        <property key="progressMessageAtt" type="attribute" required="true" entityProperty="progressEntity" >
+            <caption>Progress Message att</caption>
+            <category>Progress</category>
+            <description>Attribute of the progress message</description>                        
+            <attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
+        </property>
+        <property key="progressPercentAtt" type="attribute" required="true" entityProperty="progressEntity" >
+            <caption>Progress % att</caption>
+            <category>Progress</category>
+            <description>When set a progress bar is show when column, row or data is clicked</description>                        
+            <attributeTypes>
+                <attributeType name="Integer"/>
+                <attributeType name="Long"/>
+                <attributeType name="Float"/>
+            </attributeTypes>
+        </property>
+        <!--
+        <property key="progressMicroflow" type="microflow" required="true" entityProperty="progressEntity">
+            <caption>Progress MF</caption>
+            <category>Progress</category>
+            <description>This microflow will be invoked to get the latest progress.</description>
+            <returnType type="Object" entityProperty="progressEntity"/>
+        </property>-->
+        <property key="confirm" type="boolean" defaultValue="false">
+            <caption>Ask Confirmation</caption>
+            <category>Confirmation</category>
+            <description/>
+        </property>
+        <property key="conQuestion" type="translatableString" required="false">
+            <caption>Question</caption>
+            <category>Confirmation</category>
+            <description/>
+            <translations>
+                <translation lang="en_US">Are you sure?</translation>
+                <translation lang="nl_NL">Weet u het zeker?</translation>
+            </translations>
+        </property>
+        <property key="conProceed" type="translatableString" required="false">
+            <caption>Proceed button caption</caption>
+            <category>Confirmation</category>
+            <description/>
+            <translations>
+                <translation lang="en_US">Proceed</translation>
+                <translation lang="nl_NL">Doorgaan</translation>
+            </translations>
+        </property>
+        <property key="conCancel" type="translatableString" required="false">
+            <caption>Cancel button caption</caption>
+            <category>Confirmation</category>
+            <description/>
+            <translations>
+                <translation lang="en_US">Cancel</translation>
+                <translation lang="nl_NL">Annuleren</translation>
+            </translations>
+        </property>
+    </properties>
+</widget>
