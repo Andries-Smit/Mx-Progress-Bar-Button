@@ -81,10 +81,10 @@ See the general instructions under _How to Install._
 
 ## Source
 
-Source and [Sample projects](https://github.com/Andries-Smit/Mx-Progress-Bar-Button/test) at GitHub
+Source and [Sample projects](https://github.com/Andries-Smit/Mx-Progress-Bar-Button/tree/master/test) at GitHub
 
 Please contribute fixes and extensions at
-https://github.com/Andries-Smit/Mx_Progress_Bar_Button
+https://github.com/Andries-Smit/Mx-Progress-Bar-Button
 
 
 ## Known bugs
@@ -92,4 +92,4 @@ https://github.com/Andries-Smit/Mx_Progress_Bar_Button
 * None so far; please let me know when there are any issues or suggestions.
 
 Please report any issues via the github issue tracker:
-https://github.com/Andries-Smit/Mx_Progress_Bar_Button/issues
+https://github.com/Andries-Smit/Mx-Progress-Bar-Button/issues
