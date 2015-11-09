@@ -1,23 +1,22 @@
-test/Mx5.14.1/deployment/
-test/Mx5.20/deployment/
+test/*/deployment/
+test/*/.classpath
+test/*/.project
+test/*/*.lock
+test/*/test.launch
 
-test/Mx5.14.1/.classpath
-test/Mx5.20/.classpath
+!test/*/
+test/*/*
+!test/*/javasource/
+test/*/javasource/*
+!test/*/javasource/myfirstmodule/
+test/*/javasource/myfirstmodule/*
+!test/*/javasource/myfirstmodule/actions
 
-test/Mx5.14.1/.project
-test/Mx5.20/.project
-
-test/Mx5.14.1/*.lock
-test/Mx5.20/*.lock
-
-test/Mx5.14.1/test.launch
-test/Mx5.20/test.launch
-
-test/Mx5.14.1/javasource/
-test/Mx5.20/javasource/
-
+out/
+typings/
 nbproject/
 node_modules/
 *.bak
-*.launch
-zip ProgressBarButton.bat
+*.map
+*.tmp
+*.jshintrc

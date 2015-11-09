@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"module": "amd",
+		"target": "es5",
+        "sourceMap": true,
+        "watch":true		
+	},
+	"files": [
+		"src/ProgressBarButton/widget/ProgressBarButton.ts",
+		"src/ProgressBarButton/widget/ProgressBarButtonFix.ts"
+	]
+}
