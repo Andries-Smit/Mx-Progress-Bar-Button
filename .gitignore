@@ -20,3 +20,5 @@ node_modules/
 *.map
 *.tmp
 *.jshintrc
+src/ProgressBarButton/widget/ProgressBarButtonFix.js
+src/ProgressBarButton/widget/ProgressBarButton.js
