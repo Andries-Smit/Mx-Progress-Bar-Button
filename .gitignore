@@ -1,16 +1,17 @@
-test/*/deployment/
-test/*/.classpath
-test/*/.project
-test/*/*.lock
-test/*/test.launch
+test/deployment/
+test\.classpath
+test/.project
+test/*.lock
+test/*.launch
 
-!test/*/
-test/*/*
-!test/*/javasource/
-test/*/javasource/*
-!test/*/javasource/myfirstmodule/
-test/*/javasource/myfirstmodule/*
-!test/*/javasource/myfirstmodule/actions
+!test/
+test/*
+!test/javasource/
+test/javasource/*
+!test/javasource/myfirstmodule/
+test/javasource/myfirstmodule/*
+!test/javasource/myfirstmodule/actions
+
 
 out/
 nbproject/
