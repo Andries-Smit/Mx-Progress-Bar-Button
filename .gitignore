@@ -13,7 +13,6 @@ test/*/javasource/myfirstmodule/*
 !test/*/javasource/myfirstmodule/actions
 
 out/
-typings/
 nbproject/
 node_modules/
 *.bak
