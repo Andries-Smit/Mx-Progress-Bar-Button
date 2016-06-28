@@ -1,6 +1,6 @@
 {
   "name": "ProgressBarButton",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Send progress feedback to user interface when processing takes long.",
   "author": "Andries Smit <andries.smit@flockofbirds.org",
   "copyright": "Flock of Birds International BV",
@@ -25,9 +25,13 @@
     "grunt-contrib-clean": "~0.6.0",
     "grunt-contrib-compress": "~0.11.0",
     "grunt-contrib-copy": "~0.8.0",
-    "grunt-contrib-uglify": "^0.10.0",
     "grunt-contrib-watch": "~0.6.1",
-    "grunt-newer": "^1.1.0",
-    "load-grunt-tasks": "^3.1.0"
+    "load-grunt-tasks": "^3.1.0",
+    "typescript": "^1.8.2"  
+  },
+  "dependencies": {
+    "mobx": "^2.0.2",
+    "mobx-react": "^3.0.1",
+    "mobx-react-devtools": "^4.0.2"
   }
 }

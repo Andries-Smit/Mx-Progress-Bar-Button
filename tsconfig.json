@@ -1,12 +1,20 @@
 {
 	"compilerOptions": {
-		"module": "amd",
 		"target": "es5",
-        "sourceMap": true,
-        "watch":true		
+		"module": "amd",
+		"declaration": false,
+		"noImplicitAny": false,
+		"removeComments": true,
+		"experimentalDecorators": true,
+		"noLib": false,
+		"watch":true,
+		"jsx": "react",
+		"moduleResolution": "node"
 	},
-	"files": [
-		"src/ProgressBarButton/widget/ProgressBarButton.ts",
-		"src/ProgressBarButton/widget/ProgressBarButtonFix.ts"
-	]
+  "exclude": [
+    "node_modules",
+    "test",
+		"out",
+		"nbproject"
+  ]
 }
