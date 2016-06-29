@@ -45,5 +45,5 @@ declare module "ProgressBarButton/lib/mobx-react-devtools"
             left?:   number | string;
         }
     }
-    export default class DevTools extends React.Component<IDevToolProps, {}> { }
+    export default class DevTools extends __React.Component<IDevToolProps, {}> { }
 }

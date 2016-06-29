@@ -46,32 +46,30 @@ class ProgressState {
 
 @observer
 class ProgressView extends React.Component<{progressState: ProgressState}, {}> {
-    private cancelButton = this.props.progressState.cancelButtonState ?
-        <ButtonView buttonState={this.props.progressState.cancelButtonState}/> : null;
     public render() {
-        if (this.props.progressState.visable) {
+        let progress = this.props.progressState;
+        let cancelButton = progress.cancelButtonState ?
+        <ButtonView buttonState={progress.cancelButtonState}/> : null;
+        if (progress.visable) {
             return (
                 <div className="mx-progress withProgressBar">
                     <div className="mx-progress-message withProgressBar">
-                        <div className="message">{this.props.progressState.message}</div>
+                        <div className="message">{progress.message}</div>
                         <div className="progress progress-striped active">
                             <div className="progress-bar"
-                                style={this.withStyle(this.props.progressState.progress)}
+                                style={{width : progress.progress}}
                                 role="progressbar"
                                 aria-valuemin="0"
-                                aria-valuenow={this.props.progressState.progress}
+                                aria-valuenow={progress.progress}
                                 aria-valuemax="100" />
                         </div>
-                        {this.cancelButton}
+                        {cancelButton}
                     </div>
                 </div>
             );
         } else {
             return null;
         }
-    }
-    private withStyle(progress: number) {
-        return {width: progress + "%"};
     }
 };
 
@@ -97,24 +95,25 @@ class ButtonState {
 
 @observer
 class ButtonView extends React.Component<{buttonState: ButtonState}, {}> {
-    private image = this.props.buttonState.iconUrl ? <img src={this.props.buttonState.iconUrl}/> : null;
     public render() {
+        let button = this.props.buttonState;
+        let image = button.iconUrl ? <img src={button.iconUrl}/> : null;
         if (this.props.buttonState.renderType === "link") {
             return (
-                <span className={"mx-link " + this.props.buttonState.cssClasses}>
-                    <a tabIndex={-1} title={this.props.buttonState.title} onClick={this.onButonClick}>
-                        {this.image} {this.props.buttonState.caption}
+                <span className={"mx-link " + button.cssClasses}>
+                    <a tabIndex={-1} title={button.title} onClick={this.onButonClick}>
+                        {image} {button.caption}
                     </a>
                 </span>
             );
         } else {
             return (
-                <button className={"btn mx-button btn-" + this.props.buttonState.renderType + " " + this.props.buttonState.cssClasses}
-                        disabled={!this.props.buttonState.enabled}
+                <button className={"btn mx-button btn-" + button.renderType + " " + button.cssClasses}
+                        disabled={!button.enabled}
                         type="button"
-                        title={this.props.buttonState.title}
+                        title={button.title}
                         onClick={this.onButonClick} >
-                    {this.image} {this.props.buttonState.caption}
+                    {image} {button.caption}
                 </button>
             );
         }
@@ -164,6 +163,7 @@ class ProgressBarButton extends _WidgetBase {
     }
     // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
     public postCreate() {
+
         logger.debug(this.id + ".postCreate");
         this.buttonState =  new ButtonState(this.caption, this.title, this.icon, this.buttonStyle.toLowerCase(), dojoLang.hitch(this, this.onclickEvent), "");
         if (this.cancelMicroflow) {
@@ -174,7 +174,8 @@ class ProgressBarButton extends _WidgetBase {
             <div>
                 <ButtonView buttonState={this.buttonState} />
                 <ProgressView progressState={this.progressState} />
-            </div>, this.domNode);
+            </div>, this.domNode
+        );
         this.contextObj = null;
         this.progressObj = null;
     }
