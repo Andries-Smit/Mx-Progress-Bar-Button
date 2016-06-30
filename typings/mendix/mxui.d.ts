@@ -16,8 +16,7 @@ declare module mxui {
 			});
 			refresh(callback?: Function);
 			unsubscribeAll();
-			mxcontext: mendix.lib.MxContext;
-			_mxObject: mendix.lib.MxObject;			
+			mxcontext: mendix.lib.MxContext;		
 			mxform: mxui.lib.form._FormBase;
 			classes: string;
 			update(obj: mendix.lib.MxObject, callback?: Function): void;

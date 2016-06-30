@@ -23,12 +23,13 @@ import * as dojoDeclare from "dojo/_base/declare";
 import * as _WidgetBase from  "mxui/widget/_WidgetBase";
 import * as dojoLang from "dojo/_base/lang";
 import * as mxLang from "mendix/lang";
+import * as dojoConfig from "dojo/_base/config";
 
 import * as React from "ProgressBarButton/lib/react";
 import ReactDOM = require("ProgressBarButton/lib/react-dom");
 import {observable, transaction} from "ProgressBarButton/lib/mobx.umd";
 import {observer} from "ProgressBarButton/lib/mobx-react";
-// import DevTools from "ProgressBarButton/lib/mobx-react-devtools";
+import DevTools from "ProgressBarButton/lib/mobx-react-devtools";
 
 class ProgressState {
     @observable public message: string;
@@ -163,42 +164,30 @@ class ProgressBarButton extends _WidgetBase {
     }
     // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
     public postCreate() {
-
         logger.debug(this.id + ".postCreate");
         this.buttonState =  new ButtonState(this.caption, this.title, this.icon, this.buttonStyle.toLowerCase(), dojoLang.hitch(this, this.onclickEvent), "");
         if (this.cancelMicroflow) {
             this.cancelButtonState = new ButtonState(this.processCancel, null, null, "default", dojoLang.hitch(this, this.onclickCancel), "progressCancelBrn");
         }
         this.progressState = new ProgressState("About to start", 0, false, this.cancelButtonState);
+        let debugDevTools = dojoConfig.isDebug ? <DevTools/> : null;
         ReactDOM.render(
             <div>
                 <ButtonView buttonState={this.buttonState} />
                 <ProgressView progressState={this.progressState} />
+                {debugDevTools}
             </div>, this.domNode
         );
         this.contextObj = null;
         this.progressObj = null;
     }
     // mxui.widget._WidgetBase.update is called when context is changed or initialized. Implement to re-render and / or fetch data.
-    public update(obj: mendix.lib.MxObject, callback: Function) {
+    public update(obj: mendix.lib.MxObject, callback?: Function) {
         logger.debug(this.id + ".update");
         this.contextObj = obj;
-        transaction(() => {
-            if (obj) {
-                this.buttonState.enabled = true;
-            } else {
-                this.buttonState.enabled = false;
-            }
-            if (obj && this.captionAtt) {
-                    this.buttonState.caption = String(obj.get(this.captionAtt));
-            } else {
-                this.buttonState.caption = this.caption;
-            }
-        });
+
+        this.updateStore(callback);
         this._resetSubscriptions();
-        if (callback) {
-            callback();
-        }
     }
     // mxui.widget._WidgetBase.uninitialize is called when the widget is destroyed. Implement to do special tear-down work.
     public uninitialize() {
@@ -208,6 +197,24 @@ class ProgressBarButton extends _WidgetBase {
         if (this.updatehandler) {
             clearInterval(this.updatehandler);
         }
+    }
+    // Set store value, could trigger a rerender the interface.
+    private updateStore (callback?: Function) {
+        logger.debug(this.id + ".updateRendering");
+        transaction(() => {
+            if (this.contextObj) {
+                this.buttonState.enabled = true;
+            } else {
+                this.buttonState.enabled = false;
+            }
+            if (this.contextObj && this.captionAtt) {
+                    this.buttonState.caption = String(this.contextObj.get(this.captionAtt));
+            } else {
+                this.buttonState.caption = this.caption;
+            }
+        });
+        // The callback, coming from update, needs to be executed, to let the page know it finished rendering
+        mxLang.nullExec(callback);
     }
     // onclick Event is called when the button is clicked, doing asyc sequesnce:
     // confirmation, validation, saving, show progress, call microlow
@@ -234,7 +241,6 @@ class ProgressBarButton extends _WidgetBase {
         callFunctions.push( this.callMicroflow );
         mxLang.sequence(callFunctions, null, this);
     }
-
     // Creates a progress object which is used for communication progress betwean server and web UI        
     private createProgressObject(callback) {
         logger.debug(this.id + ".createProgressObject");
@@ -251,7 +257,6 @@ class ProgressBarButton extends _WidgetBase {
             },
         });
     }
-
     // Show a progress dialog for confirmation.
     private doConfirmation(cb) {
         logger.debug(this.id + ".doConfirmation", this.conQuestion, this.conProceed, this.conCancel);
@@ -281,14 +286,18 @@ class ProgressBarButton extends _WidgetBase {
     private onclickCancel() {
         logger.debug(this.id + ".onclickCancel " + this.cancelMicroflow);
         this.progressState.message = this.cancelingCaption;
-        this.cancelButtonState.enabled = false;
+        if (this.cancelButtonState) {
+            this.cancelButtonState.enabled = false;
+        }
         this.progressObj.set(this.progressMessageAtt, this.cancelingCaption);
         mx.data.action({
             callback: () => {
                 logger.debug(this.id + ".onclickCancel callback");
             },
             error: (e) => {
-                this.cancelButtonState.enabled = true;
+                if (this.cancelButtonState) {
+                    this.cancelButtonState.enabled = true;
+                }
                 console.error(this.id + ".onclickCancel Cancel Progress: XAS error executing microflow " + this.cancelMicroflow, e);
                 mx.ui.error(e);
             },
@@ -335,7 +344,9 @@ class ProgressBarButton extends _WidgetBase {
             callback: () => {
                 clearInterval(this.updatehandler);
                 transaction(() => {
-                    this.cancelButtonState.enabled = true;
+                    if (this.cancelButtonState) {
+                        this.cancelButtonState.enabled = true;
+                    }
                     this.buttonState.enabled = true;
                     this.progressState.visable = false;
                 });
@@ -348,7 +359,9 @@ class ProgressBarButton extends _WidgetBase {
             error: (e) => {
                 clearInterval(this.updatehandler);
                 transaction(() => {
-                    this.cancelButtonState.enabled = true;
+                    if (this.cancelButtonState) {
+                        this.cancelButtonState.enabled = true;
+                    }
                     this.buttonState.enabled = true;
                     this.progressState.visable = false;
                 });
@@ -366,6 +379,7 @@ class ProgressBarButton extends _WidgetBase {
             },
         });
     }
+    // Remove subscriptions
     private _unsubscribe () {
         if (this.handles) {
             for (let handle of this.handles) {
@@ -379,26 +393,26 @@ class ProgressBarButton extends _WidgetBase {
         logger.debug(this.id + "._resetSubscriptions");
         // Release handles on previous object, if any.
         this._unsubscribe();
-
         // When a mendix object exists create subscribtions.
         if (this.contextObj && this.captionAtt) {
             let attrHandle = mx.data.subscribe({
                 attr: this.captionAtt,
                 callback: (guid, attr, attrValue) => {
-                    this.buttonState.caption = attrValue;
+                    logger.debug(this.id + "._resetSubscriptions attribute '" + attr + "' subscription update MxId " + guid);
+                    // this.buttonState.caption = attrValue;
+                    this.updateStore();
                 },
                 guid: this.contextObj.getGuid(),
             });
-            this.handles = [attrHandle];
-        }
-        /*
-         var objectHandle = mx.data.subscribe({
+            let objectHandle = mx.data.subscribe({
+                callback: (guid) => {
+                    logger.debug(this.id + "._resetSubscriptions object subscription update MxId " + guid);
+                    this.updateStore();
+                },
                 guid: this.contextObj.getGuid(),
-                callback: () => {
-                    this._updateRendering();
-                }
-            }); 
-         */
+            });
+            this.handles = [attrHandle, objectHandle];
+        }
     }
 }
 

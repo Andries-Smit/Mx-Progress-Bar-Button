@@ -70,13 +70,13 @@ declare module mendix {
 			
 		}
 	}
-
-	interface lang {
+	class lang {
 		collect(chain: Function[], callback?: Function, scope?: Object): void;
 		delay(func: Function, condition: Function, period?: number): number;
 		getUniqueId(): string;
 		map(objOrArray: Object | Object[], func: Function, scope?: Object): any[];
 		sequence(chain: Function[], callback?: Function, scope?: Object): void;
+		nullExec(callbcack: Function):void;
 	}
 
 	class validator {
