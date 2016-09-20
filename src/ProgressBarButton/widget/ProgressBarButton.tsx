@@ -23,31 +23,27 @@ declare var logger: mendix.logger;
 
 import * as dojoDeclare from "dojo/_base/declare";
 import * as _WidgetBase from  "mxui/widget/_WidgetBase";
-import * as dojoLang from "dojo/_base/lang";
 import * as mxLang from "mendix/lang";
-import * as dojoConfig from "dojo/_base/config";
 
 import * as React from "ProgressBarButton/lib/react";
 import ReactDOM = require("ProgressBarButton/lib/react-dom");
-import {transaction} from "ProgressBarButton/lib/mobx.umd";
-import DevTools from "ProgressBarButton/lib/mobx-react-devtools";
-import {ButtonView, ButtonState} from "./components/Button";
-import {ProgressView, ProgressState } from "./components/Progress";
+import {ProgressBarButton, IProgressBarButtonState, IProgressBarButtonProps} from "./components/ProgressBarButton";
 
-class ProgressBarButton extends _WidgetBase {
+export class ProgressBarButtonWrapper extends _WidgetBase {
     // Parameters configured in the Modeler
     public title: string;
+    public progressObj: mendix.lib.MxObject; //  have not so nice, but have to share object with child nodes...
     private caption: string;
     private captionAtt: string;
     private icon: string;
     private buttonStyle: string;
     private onClickMicroflow: string;
+    private processCancel: string;
     private progressEntity: string;
     private progressMessage: string;
     private progressMessageAtt: string;
     private progressPercentAtt: string;
     private cancelingCaption: string;
-    private processCancel: string;
     private cancelMicroflow: string;
     private confirm: boolean;
     private async: boolean;
@@ -58,13 +54,8 @@ class ProgressBarButton extends _WidgetBase {
     private conCancel: string;
     // Internal variables. Non-primitives created in the prototype are shared between all widget instances.
     private contextObj: mendix.lib.MxObject;
-    private progressObj: mendix.lib.MxObject;
-    private progressInterval: number;
-    private updatehandler: number;
-    private progressState: ProgressState;
-    private buttonState: ButtonState;
-    private cancelButtonState: ButtonState;
-    private handles: any[];
+    private handles: number[];
+    private progressBarButtonComponent: React.Component<IProgressBarButtonProps, IProgressBarButtonState>;
 
     // The TypeScript Contructor, not the dojo consctuctor, move contructor work into widget prototype at bottom of the page. 
     constructor(args?: Object, elem?: HTMLElement) {
@@ -72,31 +63,41 @@ class ProgressBarButton extends _WidgetBase {
         super() ;
         return new dojoProgressBarButton(args, elem);
     }
+    public createProps() {
+        return { // TODO group properties on function like button.
+            async: this.async,
+            blocking: this.blocking,
+            buttonStyle: this.buttonStyle,
+            cancelMicroflow: this.cancelMicroflow,
+            cancelingCaption: this.cancelingCaption,
+            caption: this.caption,
+            conCancel: this.conCancel,
+            conProceed: this.conProceed,
+            conQuestion: this.conQuestion,
+            confirm: this.confirm,
+            icon: this.icon,
+            onClickMicroflow: this.onClickMicroflow,
+            processCancel: this.processCancel,
+            progressEntity: this.progressEntity,
+            progressMessage: this.progressMessage,
+            title: this.title,
+            validate: this.validate,
+        };
+    }
     // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
     public postCreate() {
-        logger.debug(this.id + ".postCreate");
-        this.buttonState =  new ButtonState(this.caption,
-                                            this.title,
-                                            this.icon,
-                                            this.buttonStyle.toLowerCase(),
-                                            dojoLang.hitch(this, this.onclickEvent),
-                                            "");
-        if (this.cancelMicroflow) {
-            this.cancelButtonState = new ButtonState(this.processCancel,
-                                                        null,
-                                                        null,
-                                                        "default",
-                                                        dojoLang.hitch(this, this.onclickCancel),
-                                                        "progressCancelBtn");
-        }
-        this.progressState = new ProgressState("About to start", 0, false, this.cancelButtonState);
-        let debugDevTools = dojoConfig.isDebug ? <DevTools/> : null;
+        logger.debug(this.id + ".postCreate !");
+
+        this.mxUpdateProgressObject = this.mxUpdateProgressObject.bind(this);
+        this.mxCreateProgressObject = this.mxCreateProgressObject.bind(this);
+        this.formSave = this.formSave.bind(this);
+        this.formValidate = this.formValidate.bind(this);
         ReactDOM.render(
-            <div>
-                <ButtonView buttonState={this.buttonState} />
-                <ProgressView progressState={this.progressState} />
-                {debugDevTools}
-            </div>, this.domNode
+            <ProgressBarButton
+                widgetId={this.id} {...this.createProps()}
+                ref={(c) => this.progressBarButtonComponent = c}
+                wrapper={this}
+                />, this.domNode
         );
         this.contextObj = null;
         this.progressObj = null;
@@ -114,137 +115,21 @@ class ProgressBarButton extends _WidgetBase {
         logger.debug(this.id + ".uninitialize");
         // Clean up listeners, helper objects, etc. There is no need to remove listeners added with this.connect / this.subscribe / this.own.
         ReactDOM.unmountComponentAtNode(this.domNode);
-        if (this.updatehandler) {
-            clearInterval(this.updatehandler);
-        }
         this._unsubscribe();
     }
-    // Set store value, could trigger a rerender the interface.
-    private updateStore (callback?: Function) {
-        logger.debug(this.id + ".updateRendering");
-        transaction(() => {
-            if (this.contextObj) {
-                this.buttonState.enabled = true;
-            } else {
-                this.buttonState.enabled = false;
-            }
-            if (this.contextObj && this.captionAtt) {
-                    this.buttonState.caption = String(this.contextObj.get(this.captionAtt));
-            } else {
-                this.buttonState.caption = this.caption;
-            }
-        });
-        // The callback, coming from update, needs to be executed, to let the page know it finished rendering
-        mxLang.nullExec(callback);
-    }
-    // onclick Event is called when the button is clicked, doing asyc sequesnce:
-    // confirmation, validation, saving, show progress, call microlow
-    private onclickEvent() {
-        logger.debug(this.id + ".onclickEvent");
-        let callFunctions: Function[] = [];
-        if (this.confirm) {
-            callFunctions.push(this.doConfirmation);
-        }
-        if (this.validate === true) {
-            callFunctions.push(dojoLang.hitch(this.mxform, this.mxform.validate));
-        }
-        callFunctions.push((callback) => {
-            this.mxform.save(callback, (error) => {
-                if (!(error instanceof mendix.lib.ValidationError)) {
-                    mx.onError(error);
-                }
-            });
-        });
-        if (this.progressObj === null) {
-            callFunctions.push(this.createProgressObject);
-        }
-        callFunctions.push(this.showProgress);
-        callFunctions.push( this.callMicroflow );
-        mxLang.sequence(callFunctions, null, this);
-    }
-    // Creates a progress object which is used for communication progress betwean server and web UI        
-    private createProgressObject(callback) {
-        logger.debug(this.id + ".createProgressObject");
-        mx.data.create({
-            callback: (obj) => {
-                this.progressObj = obj;
-                if (callback) {
-                    callback();
-                }
-            },
-            entity: this.progressEntity,
-            error: (e) => {
-                console.error("ProgressBarButton.widget.ProgressBarButton createProgressObject; an error occured creating " + this.progressEntity + " :" + e);
-            },
-        });
-    }
-    // Show a progress dialog for confirmation.
-    private doConfirmation(cb) {
-        logger.debug(this.id + ".doConfirmation", this.conQuestion, this.conProceed, this.conCancel);
-        mx.ui.confirmation({
-            cancel: this.conCancel,
-            content: this.conQuestion,
-            handler: cb,
-            proceed: this.conProceed,
-        });
-    }
-    // show the progressbar
-    private showProgress(callback) {
-        logger.debug(this.id + ".showProgress");
-        if (this.blocking) {
-             mx.ui.showUnderlay();
-        }
-        transaction(() => {
-            this.buttonState.enabled = false;
-            this.progressState.message = this.progressMessage;
-            this.progressState.progress = 0;
-            this.progressState.visable = true;
-        });
-        this.updatehandler = setInterval(() => this.updateProgress(), this.progressInterval);
-        callback();
-    }
-    // start canceling thensaction.
-    private onclickCancel() {
-        logger.debug(this.id + ".onclickCancel " + this.cancelMicroflow);
-        this.progressState.message = this.cancelingCaption;
-        if (this.cancelButtonState) {
-            this.cancelButtonState.enabled = false;
-        }
-        mx.data.action({
-            callback: () => {
-                logger.debug(this.id + ".onclickCancel callback");
-            },
-            error: (e) => {
-                if (this.cancelButtonState) {
-                    this.cancelButtonState.enabled = true;
-                }
-                console.error(this.id + ".onclickCancel Cancel Progress: XAS error executing microflow " + this.cancelMicroflow, e);
-                mx.ui.error(e);
-            },
-            params: {
-                actionname: this.cancelMicroflow,
-                applyto: "selection",
-                guids: [this.progressObj.getGuid()],
-            },
-        });
-    }
-    // update the progress messages and bar. 
-    private updateProgress() {
+    public mxUpdateProgressObject() {
         logger.debug(this.id + ".updateProgress");
         mx.data.get({
-            callback: (objs) => {
+            callback: (objs: mendix.lib.MxObject[]) => {
                 if (objs && objs.length > 0) {
                     let obj = objs[0];
-                    let value = Math.round(obj.get(this.progressPercentAtt));
-                    if (value > 100) {
-                        value = 100;
-                    }
-                    if (value < 0) {
-                        value = 0;
-                    }
-                    transaction(() => {
-                        this.progressState.message = this.progressMessage + obj.get(this.progressMessageAtt);
-                        this.progressState.progress = value;
+                    let msg = String(obj.get(this.progressMessageAtt));
+                    let percent = Number(obj.get(this.progressPercentAtt));
+                    this.progressBarButtonComponent.setState({
+                        progressEntity: {
+                            progressMessageAtt: msg,
+                            progressPercentAtt: percent,
+                        },
                     });
                 }
             },
@@ -255,48 +140,80 @@ class ProgressBarButton extends _WidgetBase {
             noCache: true,
         });
     }
-
-    // call the microflow and remove progress on finishing
-    private callMicroflow(callback: Function) {
-        logger.debug(this.id + ".callMicroflow");
-        mx.data.action({
-            async: this.async,
-            callback: () => {
-                clearInterval(this.updatehandler);
-                transaction(() => {
-                    if (this.cancelButtonState) {
-                        this.cancelButtonState.enabled = true;
-                    }
-                    this.buttonState.enabled = true;
-                    this.progressState.visable = false;
-                });
-                if (this.blocking) {
-                    mx.ui.hideUnderlay();
+    public formSave(callback?: Function) {
+        this.mxform.save(callback, (error) => {
+            if (!(error instanceof mendix.lib.ValidationError)) {
+                mx.onError(error);
+            }
+        });
+    }
+    public formValidate(callback?: Function) {
+        this.mxform.validate.bind(this.mxform);
+        this.mxform.validate(callback);
+    }
+    // Creates a progress object which is used for communication progress betwean server and web UI        
+    public mxCreateProgressObject(callback: Function) {
+        logger.debug(this.id + ".createProgressObject");
+        mx.data.create({
+            callback: (obj) => {
+                this.progressObj = obj;
+                this.progressBarButtonComponent.setState({
+                        progressEntity: {
+                            guid: String(obj.getGuid()),
+                            progressMessageAtt: String(obj.get(this.progressMessageAtt)),
+                            progressPercentAtt: Number(obj.get(this.progressPercentAtt)),
+                        },
+                    });
+                if (callback) { // TODO check if callback should happen in callback of set state
+                    callback();
                 }
-                callback();
             },
-            context: this.mxcontext,
+            entity: this.progressEntity,
             error: (e) => {
-                clearInterval(this.updatehandler);
-                transaction(() => {
-                    if (this.cancelButtonState) {
-                        this.cancelButtonState.enabled = true;
-                    }
-                    this.buttonState.enabled = true;
-                    this.progressState.visable = false;
-                });
-                if (this.blocking) {
-                    mx.ui.hideUnderlay();
+                console.error("ProgressBarButton.widget.ProgressBarButton createProgressObject; an error occured creating " + this.progressEntity + " :", e);
+            },
+        });
+    }
+    // Set store value, could trigger a rerender the interface.
+    private updateStore (callback?: Function) {
+        logger.debug(this.id + ".updateRendering");
+        if (this.contextObj) {
+            this.progressBarButtonComponent.setState({enabled: true});
+        } else {
+            this.progressBarButtonComponent.setState({enabled: false});
+        }
+        if (this.contextObj && this.captionAtt) {
+            this.progressBarButtonComponent.setState({
+                context: { captionAtt: String(this.contextObj.get(this.captionAtt))},
+            });
+        } else {
+            this.progressBarButtonComponent.setState({
+                context: { captionAtt: this.caption},
+            });
+        }
+        // The callback, coming from update, needs to be executed, to let the page know it finished rendering
+        mxLang.nullExec(callback);
+    }
+    // update the progress messages and bar. 
+    private updateProgress() {
+        logger.debug(this.id + ".updateProgress");
+        mx.data.get({
+            callback: (objs: mendix.lib.MxObject[]) => {
+                if (objs && objs.length > 0) {
+                    let obj = objs[0];
+                    this.progressBarButtonComponent.setState({
+                        progressEntity: {
+                            progressMessageAtt: String(obj.get(this.progressMessageAtt)),
+                            progressPercentAtt: Number(obj.get(this.progressPercentAtt)),
+                        },
+                    });
                 }
-                console.error(this.id + ".callMicroflow : XAS error executing microflow " + this.onClickMicroflow + " : " + e);
-                mx.ui.error(e);
-                callback();
             },
-            params: {
-                actionname: this.onClickMicroflow,
-                applyto: "selection",
-                guids: [this.progressObj.getGuid()],
+            error: (e) => {
+                console.error(this.id + ".updateProgress: XAS error retreiving progress object", e);
             },
+            guids: [this.progressObj.getGuid()],
+            noCache: true,
         });
     }
     // Remove subscriptions
@@ -350,6 +267,6 @@ let dojoProgressBarButton = dojoDeclare("ProgressBarButton.widget.ProgressBarBut
         }
     }
     return result;
-} (ProgressBarButton)));
+} (ProgressBarButtonWrapper)));
 
-export = ProgressBarButton;
+export default ProgressBarButtonWrapper;

@@ -1,57 +1,66 @@
 import * as React from "ProgressBarButton/lib/react";
-import {observable} from "ProgressBarButton/lib/mobx.umd";
-import {observer} from "ProgressBarButton/lib/mobx-react";
+// TODO react auto bind
+// TODO react pure mixin
 
-export class ButtonState {
-    @observable public caption: string;
-    @observable public enabled = true;
-    public title: string;
-    public iconUrl: string;
-    public iconClass: string;
-    public renderType: string;
-    public onClick: Function;
-    public cssStyle: string;
-    public cssClasses: string;
-    constructor(caption: string, title: string,  iconUrl: string, renderType: string, onClick: Function, cssClasses: string) {
-        this.caption = caption;
-        this.title = title;
-        this.iconUrl = iconUrl;
-        this.renderType = renderType;
-        this.onClick = onClick;
-        this.cssClasses = cssClasses;
-    }
-
-    public resetState() {
-        this.enabled = true;
-    }
+export interface IButtonProps {
+    ref?: (component: React.Component<IButtonProps, IButtonState>) => React.Component<IButtonProps, IButtonState>;
+    caption?: string;
+    enabled?: boolean;
+    title?: string;
+    iconUrl?: string;
+    iconClass?: string;
+    renderType?: string ;
+    onClick?: Function;
+    cssStyle?: string;
+    cssClasses?: string;
+}
+export interface IButtonState {
+    caption?: string;
+    // enabled?: boolean;
 }
 
-@observer
-export class ButtonView extends React.Component<{buttonState: ButtonState}, {}> {
+interface IImageProps {
+    iconUrl: string;
+}
+
+const Image = ({iconUrl}: IImageProps) =>  iconUrl ? <img src={iconUrl}/> : null;
+
+export default class ButtonView extends React.Component<IButtonProps, IButtonState> {
+    public static defaultProps: IButtonProps = {
+        cssClasses: "",
+        renderType: "button",
+    };
+    constructor(props: IButtonProps) {
+        super(props);
+        // set initial state
+        this.state = {
+            caption: this.props.hasOwnProperty("caption") ? this.props.caption : "",
+            // enabled: this.props.hasOwnProperty("enabled") ? this.props.enabled : true,
+        };
+    }
     public render() {
-        let button = this.props.buttonState;
-        let image = button.iconUrl ? <img src={button.iconUrl}/> : null;
+        let button = this.props;
         if (button.renderType === "link") {
             return (
                 <span className={"mx-link " + button.cssClasses}>
                     <a tabIndex={-1} title={button.title} onClick={this.onButonClick}>
-                        {image} {button.caption}
+                        <Image iconUrl={button.iconUrl} />{" "}{this.props.caption}
                     </a>
                 </span>
             );
         } else {
             return (
                 <button className={"btn mx-button btn-" + button.renderType + " " + button.cssClasses}
-                        disabled={!button.enabled}
+                        disabled={!this.props.enabled}
                         type="button"
                         title={button.title}
                         onClick={this.onButonClick} >
-                    {image} {button.caption}
+                    <Image iconUrl={button.iconUrl} />{" "}{this.props.caption}
                 </button>
             );
         }
      }
      private onButonClick = () => {
-         this.props.buttonState.onClick();
+         this.props.onClick();
      }
 };

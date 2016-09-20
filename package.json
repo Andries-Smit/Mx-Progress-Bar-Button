@@ -1,6 +1,6 @@
 {
   "name": "ProgressBarButton",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "description": "Send progress feedback to user interface when processing takes long.",
   "author": "Andries Smit <andries.smit@flockofbirds.org",
   "copyright": "Flock of Birds International BV",
@@ -30,8 +30,8 @@
     "typescript": "^2.0.2"
   },
   "dependencies": {
-    "mobx": "^2.0.2",
-    "mobx-react": "^3.0.1",
-    "mobx-react-devtools": "^4.0.2"
+    "react": "^15.3.2",
+    "react-addons-pure-render-mixin": "^15.3.2",
+    "react-autobind": "^1.0.6"
   }
 }
