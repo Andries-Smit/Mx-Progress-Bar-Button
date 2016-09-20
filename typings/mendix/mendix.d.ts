@@ -8,14 +8,14 @@ declare module mendix {
 			addReference(attr: string, guid: string | number): boolean;
 			addReferences(attr: string, guids: string[] | number[]): boolean;
 			compare(mxobj: mendix.lib.MxObject): boolean;
-			fetch(path, callback): void;
+			fetch(path: string, callback: Function): void;
 			get(attr: string): string | number | boolean; //add external big	
-			removeReferences(attr, guids: string[]): boolean;
+			removeReferences(attr:string, guids: string[]): boolean;
 			set(attr: string, val: any): boolean;
-			FetchCallback(requested: any);
-			setTrackEntity(entity: string);
-			setTrackId(guid: string);
-			setTrackObject(obj: mendix.lib.MxObject);
+			FetchCallback(requested: any): void;
+			// setTrackEntity(entity: string): void;
+			// setTrackId(guid: string): void;
+			// setTrackObject(obj: mendix.lib.MxObject): void;
 		}
 
 		class MxContext {
@@ -111,10 +111,3 @@ declare module "mendix/logger"
 	var logger: mendix.logger;
 	export = logger;
 }
-
-
-
-
-
-
-

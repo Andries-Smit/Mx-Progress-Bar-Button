@@ -1,3 +1,5 @@
+
+
 /*
  ProgressBarButton
  ========================
@@ -27,102 +29,8 @@ import * as dojoConfig from "dojo/_base/config";
 
 import * as React from "ProgressBarButton/lib/react";
 import ReactDOM = require("ProgressBarButton/lib/react-dom");
-import {observable, transaction} from "ProgressBarButton/lib/mobx.umd";
-import {observer} from "ProgressBarButton/lib/mobx-react";
+import {transaction} from "ProgressBarButton/lib/mobx.umd";
 import DevTools from "ProgressBarButton/lib/mobx-react-devtools";
-
-class ProgressState {
-    @observable public message: string;
-    @observable public progress: number;
-    @observable public visable: boolean;
-    public cancelButtonState: ButtonState;
-
-    constructor (message: string, progress: number, visable: boolean, cancelButtonState?: ButtonState) {
-        this.message = message;
-        this.progress = progress;
-        this.visable = visable;
-        this.cancelButtonState = cancelButtonState;
-    }
-}
-
-@observer
-class ProgressView extends React.Component<{progressState: ProgressState}, {}> {
-    public render() {
-        let progress = this.props.progressState;
-        let cancelButton = progress.cancelButtonState ?
-        <ButtonView buttonState={progress.cancelButtonState}/> : null;
-        if (progress.visable) {
-            return (
-                <div className="mx-progress withProgressBar">
-                    <div className="mx-progress-message withProgressBar">
-                        <div className="message">{progress.message}</div>
-                        <div className="progress progress-striped active">
-                            <div className="progress-bar"
-                                style={{width : progress.progress}}
-                                role="progressbar"
-                                aria-valuemin="0"
-                                aria-valuenow={progress.progress}
-                                aria-valuemax="100" />
-                        </div>
-                        {cancelButton}
-                    </div>
-                </div>
-            );
-        } else {
-            return null;
-        }
-    }
-};
-
-class ButtonState {
-    @observable public caption: string;
-    @observable public enabled = true;
-    public title: string;
-    public iconUrl: string;
-    public iconClass: string;
-    public renderType: string;
-    public onClick: Function;
-    public cssStyle: string;
-    public cssClasses: string;
-    constructor(caption: string, title: string,  iconUrl: string, renderType: string, onClick: Function, cssClasses: string) {
-        this.caption = caption;
-        this.title = title;
-        this.iconUrl = iconUrl;
-        this.renderType = renderType;
-        this.onClick = onClick;
-        this.cssClasses = cssClasses;
-    }
-}
-
-@observer
-class ButtonView extends React.Component<{buttonState: ButtonState}, {}> {
-    public render() {
-        let button = this.props.buttonState;
-        let image = button.iconUrl ? <img src={button.iconUrl}/> : null;
-        if (this.props.buttonState.renderType === "link") {
-            return (
-                <span className={"mx-link " + button.cssClasses}>
-                    <a tabIndex={-1} title={button.title} onClick={this.onButonClick}>
-                        {image} {button.caption}
-                    </a>
-                </span>
-            );
-        } else {
-            return (
-                <button className={"btn mx-button btn-" + button.renderType + " " + button.cssClasses}
-                        disabled={!button.enabled}
-                        type="button"
-                        title={button.title}
-                        onClick={this.onButonClick} >
-                    {image} {button.caption}
-                </button>
-            );
-        }
-     }
-     private onButonClick = () => {
-         this.props.buttonState.onClick();
-     }
-};
 
 class ProgressBarButton extends _WidgetBase {
     // Parameters configured in the Modeler
@@ -165,9 +73,19 @@ class ProgressBarButton extends _WidgetBase {
     // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
     public postCreate() {
         logger.debug(this.id + ".postCreate");
-        this.buttonState =  new ButtonState(this.caption, this.title, this.icon, this.buttonStyle.toLowerCase(), dojoLang.hitch(this, this.onclickEvent), "");
+        this.buttonState =  new ButtonState(this.caption,
+                                            this.title,
+                                            this.icon,
+                                            this.buttonStyle.toLowerCase(),
+                                            dojoLang.hitch(this, this.onclickEvent),
+                                            "");
         if (this.cancelMicroflow) {
-            this.cancelButtonState = new ButtonState(this.processCancel, null, null, "default", dojoLang.hitch(this, this.onclickCancel), "progressCancelBrn");
+            this.cancelButtonState = new ButtonState(this.processCancel,
+                                                        null,
+                                                        null,
+                                                        "default",
+                                                        dojoLang.hitch(this, this.onclickCancel),
+                                                        "progressCancelBtn");
         }
         this.progressState = new ProgressState("About to start", 0, false, this.cancelButtonState);
         let debugDevTools = dojoConfig.isDebug ? <DevTools/> : null;
@@ -197,6 +115,7 @@ class ProgressBarButton extends _WidgetBase {
         if (this.updatehandler) {
             clearInterval(this.updatehandler);
         }
+        this._unsubscribe();
     }
     // Set store value, could trigger a rerender the interface.
     private updateStore (callback?: Function) {
@@ -289,7 +208,6 @@ class ProgressBarButton extends _WidgetBase {
         if (this.cancelButtonState) {
             this.cancelButtonState.enabled = false;
         }
-        this.progressObj.set(this.progressMessageAtt, this.cancelingCaption);
         mx.data.action({
             callback: () => {
                 logger.debug(this.id + ".onclickCancel callback");
@@ -399,7 +317,6 @@ class ProgressBarButton extends _WidgetBase {
                 attr: this.captionAtt,
                 callback: (guid, attr, attrValue) => {
                     logger.debug(this.id + "._resetSubscriptions attribute '" + attr + "' subscription update MxId " + guid);
-                    // this.buttonState.caption = attrValue;
                     this.updateStore();
                 },
                 guid: this.contextObj.getGuid(),
@@ -422,7 +339,7 @@ let dojoProgressBarButton = dojoDeclare("ProgressBarButton.widget.ProgressBarBut
     let result: any = {};
     // dojo.declare.constructor is called to construct the widget instance. Implement to initialize non-primitive properties.
     result.constructor = function() {
-        logger.debug( this.id + ".constructor");
+        logger.debug( this.id + ".constructor dojo");
         this.progressInterval = 100;
     };
     for (let i in Source.prototype) {

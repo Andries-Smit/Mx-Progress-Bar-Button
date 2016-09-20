@@ -47,3 +47,4 @@ declare module "ProgressBarButton/lib/mobx-react-devtools"
     }
     export default class DevTools extends __React.Component<IDevToolProps, {}> { }
 }
+

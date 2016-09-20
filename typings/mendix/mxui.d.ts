@@ -13,9 +13,9 @@ declare module mxui {
 				attr?: string,
 				val?: boolean,
 				callback: Function
-			});
-			refresh(callback?: Function);
-			unsubscribeAll();
+			}): number;
+			// refresh(callback?: Function);
+			unsubscribeAll(): void;
 			mxcontext: mendix.lib.MxContext;		
 			mxform: mxui.lib.form._FormBase;
 			classes: string;
@@ -48,14 +48,14 @@ declare module mxui {
 				id: string;
 				path: string;
 				title: string;
-				callRecursive(method: string, ...param: any[])
+				callRecursive(method: string, ...param: any[]): void;
 				commit(callback: Function, error?: Function): void;
 				getChildren(nested: boolean): dijit._WidgetBase[];
 				listen(): number;
 				publish(message: string, callback: Function, error: Function): void;
 				rollback(callback: Function, error?: Function): void;
-				save(callback: Function, error?: Function): void;
-				unlisten(handle: number);
+				save(callback: Function, error?: (error: Error)=> void): void;
+				unlisten(handle: number): void;
 				validate(callback: Function, error?: Function): void;
 			}
 			
