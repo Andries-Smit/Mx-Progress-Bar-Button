@@ -23,3 +23,4 @@ node_modules/
 src/ProgressBarButton/widget/ProgressBarButton.js
 src/ProgressBarButton/widget/components/ProgressBarButton.js
 src/ProgressBarButton/widget/components/Button.js
+src/ProgressBarButton/widget/components/Button.js
