@@ -31,6 +31,8 @@ import * as React from "ProgressBarButton/lib/react";
 import ReactDOM = require("ProgressBarButton/lib/react-dom");
 import {transaction} from "ProgressBarButton/lib/mobx.umd";
 import DevTools from "ProgressBarButton/lib/mobx-react-devtools";
+import {ButtonView, ButtonState} from "./components/Button";
+import {ProgressView, ProgressState } from "./components/Progress";
 
 class ProgressBarButton extends _WidgetBase {
     // Parameters configured in the Modeler
