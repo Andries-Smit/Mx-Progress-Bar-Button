@@ -1,6 +1,6 @@
 {
   "name": "ProgressBarButton",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Send progress feedback to user interface when processing takes long.",
   "author": "Andries Smit <andries.smit@flockofbirds.org",
   "copyright": "Flock of Birds International BV",

@@ -1,7 +1,6 @@
 /*global module*/
 module.exports = function (grunt) {
     var pkg = grunt.file.readJSON("package.json");
-    grunt.verbose;
     grunt.initConfig({
         pkgName: pkg.name,
         name: pkg.name,
@@ -49,13 +48,15 @@ module.exports = function (grunt) {
             deployment: {
                 files: [
                     {dest: "./test/Mx5.14.1/deployment/web/widgets", cwd: "./src/", src: ["**/*"], expand: true},
-                    {dest: "./test/Mx5.21/deployment/web/widgets", cwd: "./src/", src: ["**/*"], expand: true}
+                    {dest: "./test/Mx5.21/deployment/web/widgets", cwd: "./src/", src: ["**/*"], expand: true},
+                    {dest: "./test/Mx6/deployment/web/widgets", cwd: "./src/", src: ["**/*"], expand: true}
                 ]
             },
             mpks: {
                 files: [
                     {dest: "./test/Mx5.14.1/widgets", cwd: "./dist/" + pkg.version + "/", src: [ pkg.name + ".mpk"], expand: true},
-                    {dest: "./test/Mx5.21/widgets", cwd: "./dist/" + pkg.version + "/", src: [ pkg.name + ".mpk"], expand: true}
+                    {dest: "./test/Mx5.21/widgets", cwd: "./dist/" + pkg.version + "/", src: [ pkg.name + ".mpk"], expand: true},
+                    {dest: "./test/Mx6/widgets", cwd: "./dist/" + pkg.version + "/", src: [ pkg.name + ".mpk"], expand: true}
                 ]
             },
             out: {
@@ -68,10 +69,8 @@ module.exports = function (grunt) {
         clean: {
             build: [
                     "./dist/" + pkg.version + "/" + pkg.name + "/*",
-                    "./test/Mx5.14.1/deployment/web/widgets/" + pkg.name + "/*",
-                    "./test/Mx5.14.1/widgets/" + pkg.name + ".mpk",
-                    "./test/Mx5.21/deployment/web/widgets/" + pkg.name + "/*",
-                    "./test/Mx5.21/widgets/" + pkg.name + ".mpk"
+                    "./test/*deployment/web/widgets/" + pkg.name + "/*",
+                    "./test/*/widgets/" + pkg.name + ".mpk",
                 ],
             out : "./out/**/*"                
         },
@@ -96,12 +95,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-contrib-watch");
     grunt.loadNpmTasks("grunt-contrib-copy");
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.registerTask("default", ["watch"]);
+    grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.registerTask("default", [ "clean build", "watch" ]);
     grunt.registerTask("distribute", ["clean:out", "copy:out", "uglify", "compress:out", "copy:mpks" ]);
     grunt.registerTask(
             "clean build",
             "Compiles all the assets and copies the files to the build directory.", ["clean:build","compress:makezip", "copy:mpks" ]
             );
-    grunt.registerTask("build", ["clean build"]);
+    grunt.registerTask("build", [ "clean build"]);
 };

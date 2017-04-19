@@ -1,13 +1,8 @@
 # Progress Bar Button
-Author: Andries Smit, Flock of Birds
 
-Type: Widget
-Latest Version: 1.0
-Package file name: Progress Bar Button.mpk
+Send intermediate progress feedback to user interface when processing takes long.
 
 ## Description
-
-Send progress feedback to user interface when processing takes long.
 
 A microflow button widget that shows progress messages and a progress bar during the  processing of microflows. In the MF the messages and percentage can be updated and are show to the user directly.
 
