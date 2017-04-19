@@ -27,6 +27,7 @@
  */
 
 declare var mx: mx.mx;
+declare var logger: mendix.logger;
 
 import * as dojoDeclare from "dojo/_base/declare";
 import * as _WidgetBase from  "mxui/widget/_WidgetBase";
@@ -36,7 +37,6 @@ import * as domConstruct from "dojo/dom-construct";
 import * as domAttr from "dojo/dom-attr";
 import * as dojoLang from "dojo/_base/lang";
 import * as mxLang from "mendix/lang";
-import * as logger from "mendix/logger";
 
 class ProgressBarButton extends _WidgetBase {    
         
@@ -77,13 +77,12 @@ class ProgressBarButton extends _WidgetBase {
     
     // The TypeScript Contructor, not the dojo consctuctor, move contructor work into widget prototype at bottom of the page. 
     constructor(args?: Object, elem?: HTMLElement) {
+        super();
         return new __ProgressBarButton(args, elem);
-        super() ;        
     }
         
     // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
     postCreate() {
-        // post
         this._contextObj = null;
         this._progressObj = null;
         var btnStyleClass = this.buttonStyle === "link" ? "" : " btn-" + this.buttonStyle.toLowerCase();
@@ -168,7 +167,6 @@ class ProgressBarButton extends _WidgetBase {
         
     // mxui.widget._WidgetBase.update is called when context is changed or initialized. Implement to re-render and / or fetch data.
     update(obj: mendix.lib.MxObject, callback: Function) {
-        logger.debug(this.id + ".update");
         this._contextObj = obj;
         this.button.update(obj, callback);
     }
@@ -254,11 +252,11 @@ class ProgressBarButton extends _WidgetBase {
             });
             domConstruct.place(this.cancelBtn.domNode, msgNodeWrapper);
         }
-        this._updatehandler = setInterval(dojoLang.hitch(this, this.updateProgress), this._progressInterval);
+        this._updatehandler = window.setInterval(dojoLang.hitch(this, this.updateProgress), this._progressInterval);
         callback();
     }
 
-    onclickCancel(e) {
+    onclickCancel() {
         this._progressObj.set(this.progressMessageAtt, this.cancelingCaption);
         mx.data.action({
             params: {
@@ -268,7 +266,7 @@ class ProgressBarButton extends _WidgetBase {
             },
             callback: function() {
             },
-            error: function() {
+            error: function(e) {
                 console.error("ProgressBarButton.widget.ProgressBarButton Cancel Progress: XAS error executing microflow" + this. cancelMicroflow+ " : "  + e);
             },
         }, this);
@@ -310,12 +308,12 @@ class ProgressBarButton extends _WidgetBase {
             context: this.mxcontext,
             async: this.async,
             callback: function() {
-                clearInterval(self._updatehandler);
+                window.clearInterval(self._updatehandler);
                 self.progress.remove(self.msgId);
                 callback();
             },
             error: function(e) {
-                clearInterval(self._updatehandler);
+                window.clearInterval(self._updatehandler);
                 self.progress.remove(self.msgId);
                 console.error("ProgressBarButton.widget.ProgressBarButton callMicroflow: XAS error executing microflow " + this.onClickMicroflow + " : " + e);
                 callback();
@@ -326,7 +324,7 @@ class ProgressBarButton extends _WidgetBase {
     // mxui.widget._WidgetBase.uninitialize is called when the widget is destroyed. Implement to do special tear-down work.
     uninitialize() {
         // Clean up listeners, helper objects, etc. There is no need to remove listeners added with this.connect / this.subscribe / this.own.
-        this._updatehandler && clearInterval(this._updatehandler);
+        this._updatehandler && window.clearInterval(this._updatehandler);
         this.cancelBtn && this.cancelBtn.uninitialize();
         this.button && this.button.uninitialize();
     }
@@ -338,7 +336,7 @@ var __ProgressBarButton = dojoDeclare("ProgressBarButton.widget.ProgressBarButto
     var result: any = {};
     // dojo.declare.constructor is called to construct the widget instance. Implement to initialize non-primitive properties.
     result.constructor = function() {
-        logger.debug( this.id + ".constructor");
+        this._progressInterval = 100;
     }
     for (var i in Source.prototype) {
         if (i !== "constructor" && Source.prototype.hasOwnProperty(i)) {
